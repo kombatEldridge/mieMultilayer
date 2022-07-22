@@ -1,0 +1,28 @@
+{
+    "numLayers": "3",
+    "dielectricData": [
+        "dielectricFiles/Au_diel.txt",
+        "dielectricFiles/Si_diel.txt",
+        "dielectricFiles/Ag_diel.txt"
+    ],
+    "radii": [
+        "10",
+        "20",
+        "30"
+    ],
+    "dielectricColumns": [
+        "1",
+        "2",
+        "1",
+        "2",
+        "1",
+        "2"
+    ],
+    "wavelengthInterval": 
+        {
+            "startWavelength": "300",
+            "stopWavelength": "800",
+            "intervalWavelength": "1"
+        },
+    "outputFileName": "mieResults.txt"
+}
