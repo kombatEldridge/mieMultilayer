@@ -58,6 +58,6 @@ The outputs are as follows:
 - Column 7+: Near Field Enhancement for each layer
 
 ---
-The script for this project can be found [here](https://github.com/kombatEldridge/kombatEldridge.github.io/blob/d3715b8c9c1276d6e54b2d4db2f5290a6719a634/Mie_Multilayer.ipynb).
+The script for this project can be found [here](https://github.com/kombatEldridge/mieMultilayer/blob/194876399626b4e6be7a885a2d7a52cd65974582/mieMultilayer.py).
 
 [^j]: Describes the scattering of light by a non-absorbing, partially-absorbing, or perfectly conducting sphere.
