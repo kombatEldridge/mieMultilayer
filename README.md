@@ -2,6 +2,10 @@
 
 *Code inspired by "Improved recursive algorithm for light scattering by a multilayered sphere" from Applied Optics Yang 2003*
 
+#### Change Log: https://kombateldridge.github.io/
+
+---
+
 ## Section 1: Background Information
 This walkthrough aims to teach the reader about a recursive algorithm developed by [Wen Yang](https://opg.optica.org/ao/abstract.cfm?uri=ao-42-9-1710) on the topic as well as the addition of a Near Field Enhancement calculation to the system.
 
@@ -38,7 +42,7 @@ Input, starting with the innermost core layer, the column index (where the first
 
 **Setting 6: Wavelength Interval**
 
-Dielectric files should contain these wavelengths as data points. Interval between wavelengths will be linearly interpolated by .py script. Wavelengths should be in nanometers.
+Dielectric files should contain these wavelengths as data points. Interval between wavelengths will be polynomially interpolated by .py script. Wavelengths should be in nanometers.
 
 ## Section 3: Output File
 
