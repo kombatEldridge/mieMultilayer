@@ -13,13 +13,12 @@ numLayers = int(settings["numLayers"])
 dielectricDataPath = np.array(settings["dielectricData"])
 radii = np.array(settings["radii"]).astype(int)
 dielectricColumns = np.array(settings["dielectricColumns"]).astype(int)
-startWavelength = int(settings["wavelengthInterval"]["startWavelength"])
-stopWavelength = int(settings["wavelengthInterval"]["stopWavelength"])
-requestInterval = int(settings["wavelengthInterval"]["intervalWavelength"])
+startWavelength = int(settings["startWavelength"])
+stopWavelength = int(settings["stopWavelength"])
+requestInterval = int(settings["intervalWavelength"])
 outputFile = str(settings["outputFileName"])
 
-lamda = np.arange(startWavelength, stopWavelength +
-                  requestInterval, requestInterval)
+lamda = np.arange(startWavelength, stopWavelength, requestInterval, requestInterval)
 
 n_m = 1.33  # real part of the refractive index of medium
 k_m = 0  # imaginary part of refractive index of medium
