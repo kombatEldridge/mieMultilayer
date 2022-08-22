@@ -1,4 +1,3 @@
-from turtle import hideturtle
 import scipy.constants as sc
 import scipy.special
 import scipy
@@ -18,7 +17,8 @@ startWavelength = int(settings["startWavelength"])
 stopWavelength = int(settings["stopWavelength"])
 requestInterval = int(settings["intervalWavelength"])
 outputFile = str(settings["outputFileName"])
-lamda = np.arange(startWavelength, stopWavelength + 1, requestInterval)
+
+lamda = np.arange(startWavelength, stopWavelength, requestInterval, requestInterval)
 
 n_m = 1.33  # real part of the refractive index of medium
 k_m = 0  # imaginary part of refractive index of medium
@@ -128,14 +128,14 @@ else:
 lastTerm = int(max(largest, Nstop.real) + 15)
 
 
-def psi(n, z):
+def phi(n, z):
     return z*scipy.special.spherical_jn(n, z)
     # First kind of Spherical Bessel Function where n is the order and z is the parameter
 
 
-def Dpsi(n, z):
+def Dphi(n, z):
     return (z*scipy.special.spherical_jn(n, z, True))+(scipy.special.spherical_jn(n, z))
-    # Derivative of psi using product rule
+    # Derivative of phi using product rule
 
 
 def spherical_hn1(n, z):
@@ -158,7 +158,7 @@ def Dzeta(n, z):
 
 
 def D1(n, z):
-    return Dpsi(n, z)/psi(n, z)
+    return Dphi(n, z)/phi(n, z)
 
 
 def D3(n, z):
@@ -166,49 +166,46 @@ def D3(n, z):
 
 
 def RR(n, z):
-    return psi(n, z)/zeta(n, z)
+    return phi(n, z)/zeta(n, z)
 
 
-def ratioQ(n, l):
-    return ((psi(n, rA(l ,l-1)))/(zeta(n, rA(l ,l-1))))/((psi(n, rA(l ,l)))/(zeta(n, rA(l ,l))))
+def Hal(n, l):
+    return ((RR(n, rA(l, l))*D1(n, rA(l, l)))-(Al(n, l)*D3(n, rA(l, l))))/(RR(n, rA(l, l))-Al(n, l))
 
 
-def G1(n, l):
-    return dielectricArray[:, l]*Hal_new(n, l-1)-dielectricArray[:, l-1]*D1(n, rA(l, l-1))
-
-
-def G2(n, l):
-    return dielectricArray[:, l]*Hal_new(n, l-1)-dielectricArray[:, l-1]*D3(n, rA(l, l-1))
-
-
-def G1hat(n, l):
-    return dielectricArray[:, l-1]*Hbl_new(n, l-1)-dielectricArray[:, l]*D1(n, rA(l, l-1))
-
-
-def G2hat(n, l):
-    return dielectricArray[:, l-1]*Hbl_new(n, l-1)-dielectricArray[:, l]*D3(n, rA(l, l-1))
-
-
-def Hal_new(n, l):
-    if (l == 1):
-        return D1(n, rA(1, 1))
+def Al(n, l):
+    if (l == 2):
+        return (RR(n, rA(2, 1)))*(((dielectricArray[:, 1]*D1(n, rA(1, 1)))-(dielectricArray[:, 0]*D1(n, rA(2, 1))))/((dielectricArray[:, 1]*D1(n, rA(1, 1)))-(dielectricArray[:, 0]*D3(n, rA(2, 1)))))
     else:
-        return ((G2(n, l)*D1(n, rA(l, l)))-(ratioQ(n, l)*G1(n, l)*D3(n, rA(l, l))))/(G2(n, l)-(ratioQ(n, l)*G1(n, l)))
-    
-    
-def Hbl_new(n, l):
-    if (l == 1):
-        return D1(n, rA(1, 1))
+        return (RR(n, rA(l, l-1)))*(((dielectricArray[:, l-1]*Hal(n, l-1))-(dielectricArray[:, l-2]*D1(n, rA(l, l-1))))/((dielectricArray[:, l-1]*Hal(n, l-1))-(dielectricArray[:, l-2]*D3(n, rA(l, l-1)))))
+
+
+def Hbl(n, l):
+    return ((RR(n, rA(l, l))*D1(n, rA(l, l)))-(Bl(n, l)*D3(n, rA(l, l))))/(RR(n, rA(l, l))-Bl(n, l))
+
+
+def Bl(n, l):
+    if (l == 2):
+        return (RR(n, rA(2, 1)))*(((dielectricArray[:, 0]*D1(n, rA(1, 1)))-(dielectricArray[:, 1]*D1(n, rA(2, 1))))/((dielectricArray[:, 0]*D1(n, rA(1, 1)))-(dielectricArray[:, 1]*D3(n, rA(2, 1)))))
     else:
-        return ((G2hat(n, l)*D1(n, rA(l, l)))-(ratioQ(n, l)*G1hat(n, l)*D3(n, rA(l, l))))/(G2hat(n, l)-(ratioQ(n, l)*G1hat(n, l)))
+        return (RR(n, rA(l, l-1)))*(((dielectricArray[:, l-2]*Hbl(n, l-1))-(dielectricArray[:, l-1]*D1(n, rA(l, l-1))))/((dielectricArray[:, l-2]*Hbl(n, l-1))-(dielectricArray[:, l-1]*D3(n, rA(l, l-1)))))
+
+def cext(L):
+    sumd = 0
+    for n in range(1, lastTerm+1):
+        sumd = sumd+((2*n)+1)*(Al(n, L+1).real+Bl(n, L+1).real)
+    return ((2*sc.pi*sumd)/kappa**2).real
 
 
-def an(n, L):
-    return (((Hal_new(n, L)/dielectricArray[:, L])+(n/xL))*psi(n, xL)-psi(n-1, xL))/(((Hal_new(n, L)/dielectricArray[:, L])+(n/xL))*zeta(n, xL)-zeta(n-1, xL))
+def csca(L):
+    sumd = 0
+    for n in range(1, lastTerm+1):
+        sumd = sumd+((2*n)+1)*((np.abs(Al(n, L+1))**2)+(np.abs(Bl(n, L+1))**2))
+    return ((2*sc.pi*sumd)/kappa**2).real
 
 
-def bn(n, L):
-    return (((Hbl_new(n, L)*dielectricArray[:, L])+(n/xL))*psi(n, xL)-psi(n-1, xL))/(((Hbl_new(n, L)*dielectricArray[:, L])+(n/xL))*zeta(n, xL)-zeta(n-1, xL))
+def cabs(L):
+    return cext(L)-csca(L)
 
 
 def Qext(L):
@@ -222,10 +219,7 @@ def Qext(L):
     if (solid == 0):
         return 0
     else:
-        sumd = 0
-        for n in range(1, lastTerm+1):
-            sumd = sumd + (2*n+1)*(an(n, solid+2)+bn(n, solid+2)).real
-        return (sumd*2)/(kappa**2*radii[solid]**2)
+        return (cext(L))/(sc.pi*(radii[solid]**2))
 
 
 def Qsca(L):
@@ -239,10 +233,7 @@ def Qsca(L):
     if (solid == 0):
         return 0
     else:
-        sumd = 0
-        for n in range(1, lastTerm+1):
-            sumd = sumd + (2*n+1)*(np.abs(an(n, solid+2))+np.abs(bn(n, solid+2)))
-        return (sumd*2)/(kappa**2*radii[solid]**2)
+        return (csca(L))/(sc.pi*(radii[solid]**2))
 
 
 def Qabs(L):
@@ -252,8 +243,8 @@ def Qabs(L):
 def Qnf(l):
     sumd = 0
     for n in range(1, lastTerm+1):
-        sumd = sumd + (((np.abs(Al_new(n, l)))**2)*(((n+1)*(np.abs(spherical_hn2(n-1, rA(l, l-1))))**2)+(n*(np.abs(
-            spherical_hn2(n+1, rA(l, l-1))))**2)))+(((2*n)+1)*((np.abs(Bl_new(n, l)))**2)*(np.abs(spherical_hn2(n, rA(l, l-1))))**2)
+        sumd = sumd + (((np.abs(Al(n, l)))**2)*(((n+1)*(np.abs(spherical_hn2(n-1, rA(l, l-1))))**2)+(n*(np.abs(
+            spherical_hn2(n+1, rA(l, l-1))))**2)))+(((2*n)+1)*((np.abs(Bl(n, l)))**2)*(np.abs(spherical_hn2(n, rA(l, l-1))))**2)
     return 0.5*sumd
 
 
@@ -262,7 +253,8 @@ qnf_header = "Qnf_1"
 if (numLayers > 1):
     for i in range(2, numLayers + 1):
         qnf_header = "\t".join([qnf_header, "Qnf_" + str(i)])
-header = "\t".join(["#Lambda", "Qext", "Qsca", "Qabs", qnf_header])
+header = "\t".join(["#Lambda", "Qext", "Qsca", "Qabs",
+                   "Cext", "Csca", "Cabs", qnf_header])
 
 file.write(header)
 file.write("\n")
@@ -271,6 +263,9 @@ list1 = lamda.real
 list2 = Qext(numLayers).real
 list3 = Qsca(numLayers).real
 list4 = Qabs(numLayers).real
+list5 = cext(numLayers).real
+list6 = csca(numLayers).real
+list7 = cabs(numLayers).real
 Qnfl = np.array(Qnf(2)).reshape(len(Qnf(2)), 1)
 if (numLayers > 1):
     for i in range(3, numLayers + 2):
@@ -284,6 +279,9 @@ for i in range(0, len(lamda)):
                      str(list2[i]),
                      str(list3[i]),
                      str(list4[i]),
+                     str(list5[i]),
+                     str(list6[i]),
+                     str(list7[i]),
                      str(QnfText)])
     file.write(text+"\n")
 file.close()
