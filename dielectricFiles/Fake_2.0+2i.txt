@@ -1,0 +1,3 @@
+lambda	n1-Fake	k1-Fake
+300	2.0	2
+1000	2.0	2
