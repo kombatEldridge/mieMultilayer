@@ -1,3 +1,4 @@
+from cmath import cos
 import scipy.constants as sc
 import scipy.special
 import scipy
@@ -132,9 +133,14 @@ lastTerm = int(max(largest, Nstop.real) + 15)
 #                       Mie Theory                          #
 #                                                           #
 #          This model starts at l = numLayers and           #
-#              continues down until l = 0                   #                     #
+#              continues down until l = 0                   #
 #                                                           #
 #############################################################
+
+
+############################
+#     Helper Functions     #
+############################
 
 def zn(n, z):
     return z*(spherical_hn1(n, z))
@@ -221,7 +227,96 @@ def T4(n, l, z):
     return (cnl(n, l+1)*Dn1(n,z)*pn(n, z))-(bnl(n, l+1)*Dn3(n, z)*zn(n, z))
 
 
-### Computational Algorithm
+def piFunc(z):
+    return
+
+
+def Mo1n(j, theta, phi):
+    return cos(phi)*piFunc(cos(theta))*rn
+
+
+def Me1n():
+    return
+
+
+def No1n():
+    return
+
+
+def Ne1n():
+    return
+
+
+
+
+def getOuterLayerIndex(L):
+    i = L-1
+    while i > (-1):
+        if (dielectricArray[:, i] != m_m).all():
+            outerLayerIndex = i  # set the solid outer layer index (core = 1)
+            break
+        i -= 1
+    if (outerLayerIndex == 0):
+        return 0
+    else:
+        return outerLayerIndex
+
+###############################
+#     Algorithm Functions     #
+###############################
+
+def an(n, L):
+    return anl(n, L+1)
+
+
+def bn(n, L):
+    return bnl(n, L+1)
+
+
+def Qext():
+    outerLayerIndex = getOuterLayerIndex()
+    sum = 0
+    for n in range(1, lastTerm+1):
+        sum = sum + (2*n+1)*(an(n, outerLayerIndex+1)+bn(n, outerLayerIndex+1)).real
+    return (sum*2)/(kappa**2*radii[outerLayerIndex]**2)
+
+def Qsca():
+    outerLayerIndex = getOuterLayerIndex()
+    sum = 0
+    for n in range(1, lastTerm+1):
+        sum = sum + (2*n+1)*(np.abs(an(n, outerLayerIndex+1))+np.abs(bn(n, outerLayerIndex+1)))
+    return (sum*2)/(kappa**2*radii[outerLayerIndex]**2)
+
+
+def Qabs():
+    return Qext()-Qsca()
+
+
+outerLayerIndex = getOuterLayerIndex(numLayers)
+
+
+def El(n, l):
+    sum = 0
+    for n in range(1, lastTerm+1):
+        sum = sum + (2*n+1)*(np.abs(an(n, outerLayerIndex+1))+np.abs(bn(n, outerLayerIndex+1)))
+    return (sum*2)/(kappa**2*radii[outerLayerIndex]**2)
+
+
+def Hl(n, l):
+    return
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Start at L and go down 
 
@@ -230,46 +325,6 @@ def T4(n, l, z):
 # What happens at bnl(n, L+1) ??
 
 # They use the anl(n, L+1)/bnl(n, L+1) calculation from 2009 paper
-
-#Input the number of layers
-def Qsca(L):
-    i = L-1
-    # incase any of the outer layers are the same as the medium
-    while i > (-1):
-        if (dielectricArray[:, i] != m_m).all():
-            solid = i  # set the solid outer layer index (core = 1)
-            break
-        i -= 1
-    if (solid == 0):
-        return 0
-    else:
-        sumd = 0
-        for n in range(1, lastTerm+1):
-            sumd = sumd + (2*n+1)*(np.abs(an(n, solid+1))+np.abs(bn(n, solid+1)))
-        return (sumd*2)/(kappa**2*radii[solid]**2)
-
-#Input the number of layers
-def Qsca(L):
-    i = L-1
-    # incase any of the outer layers are the same as the medium
-    while i > (-1):
-        if (dielectricArray[:, i] != m_m).all():
-            solid = i  # set the solid outer layer index (core = 1)
-            break
-        i -= 1
-    if (solid == 0):
-        return 0
-    else:
-        sumd = 0
-        for n in range(1, lastTerm+1):
-            sumd = sumd + (2*n+1)*(np.abs(an(n, solid+1))+np.abs(bn(n, solid+1)))
-        return (sumd*2)/(kappa**2*radii[solid]**2)
-
-
-#Input the number of layers
-def Qabs(L):
-    return Qext(L)-Qsca(L)
-
 
 
 

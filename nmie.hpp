@@ -39,9 +39,6 @@
 #include <vector>
 
 #include "nmie-precision.hpp"
-//#ifdef MULTI_PRECISION
-//#include <boost/math/constants/constants.hpp>
-//#endif
 
 namespace nmie {
 //******************************************************************************
@@ -91,7 +88,6 @@ inline T vabs(const std::vector<std::complex<T>> value) {
 template <typename FloatType>
 int newround(FloatType x) {
   return x >= 0 ? static_cast<int>(x + 0.5) : static_cast<int>(x - 0.5);
-  // return x >= 0 ? (x + 0.5).convert_to<int>():(x - 0.5).convert_to<int>();
 }
 
 template <typename T>
@@ -230,9 +226,6 @@ class MultiLayerMie {
  public:
 #ifdef MULTI_PRECISION
   const float convergence_threshold_ = std::pow(10, -MULTI_PRECISION / 2);
-  //    const FloatType convergence_threshold_ = 1e-50;
-  //    const FloatType nearfield_convergence_threshold_ = std::pow(10,
-  //    -MULTI_PRECISION/2);
 
   // For near-field evaluation we use Le Ru cutoff which is valid only for
   // double precision, so convergence threshold is the same
@@ -582,11 +575,6 @@ class MesoMie {
                std::complex<FloatType> d_perp);
 
   void calc_Q();
-  // template <typename outputType = FloatType>
-  // outputType GetQext();
-
-  // template <typename outputType = FloatType>
-  // outputType GetQsca();
 };  // end of class MesoMie
 
 }  // end of namespace nmie

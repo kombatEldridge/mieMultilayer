@@ -262,8 +262,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Real calculation here
-    int nmax = nmie::nField(L, -1, x, m, -1, nmie::Modes::kAll,
-                            nmie::Modes::kAll, total_points, Xp, Yp, Zp, E, H);
+    int nmax = nmie::nField(L, -1, x, m, -1, nmie::Modes::kAll, nmie::Modes::kAll, total_points, Xp, Yp, Zp, E, H);
+
     printf("Number of multipoles used in Mie series nmax=%i\n", nmax);
     if (has_comment)
       printf("%6s\n", comment.c_str());

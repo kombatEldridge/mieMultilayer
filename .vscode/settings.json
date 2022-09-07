@@ -1,5 +1,8 @@
 {
     "C_Cpp.dimInactiveRegions": false,
     "markdown.experimental.validate.enabled": true,
-    "scss.validate": true
+    "scss.validate": true,
+    "files.associations": {
+        "complex": "cpp"
+    }
 }

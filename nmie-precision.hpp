@@ -56,7 +56,6 @@ namespace nmie
 #else
   namespace nmm = std;
   typedef double FloatType;
-// typedef float FloatType;
 #endif // MULTI_PRECISION
 
   template <class T>
