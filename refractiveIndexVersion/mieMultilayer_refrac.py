@@ -13,18 +13,19 @@ numLayers = int(settings["numLayers"])
 lamda = int(settings["wavelength"])
 # dielectricDataPath = np.array(settings["dielectricData"])
 radii = np.array(settings["radii"]).astype(int)
-refractiveStart = int(settings["refractiveStart"])
-refractiveStop = int(settings["refractiveStop"])
+refractiveStart = int(settings["refractiveImagStart"])
+refractiveStop = int(settings["refractiveImagStop"])
 refractiveInterval = float(settings["refractiveInterval"])
 refracArray = np.arange(refractiveStart, refractiveStop, refractiveInterval)
 refracArray = refracArray.reshape(len(refracArray), 1)
 for x in range(1, numLayers):
     refracArray = np.hstack((refracArray, refracArray))
-imagComponent = int(settings["imagComponent"])
-refracArray = refracArray + imagComponent*1j
+realComponent = int(settings["realComponent"])
+refracArray = realComponent + refracArray*1j
 refracArray = np.hstack((refracArray, np.ones((len(refracArray), 1))))
 outputFile = str(settings["outputFileName"])
 
+print(refracArray)
 
 n_m = 1.33  # real part of the refractive index of medium
 k_m = 0  # imaginary part of refractive index of medium

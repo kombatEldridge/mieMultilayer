@@ -2,9 +2,9 @@
     "numLayers": "2",
     "wavelength": "440",
     "radii": ["20","30"],
-    "refractiveStart": "1",
-    "refractiveStop": "4",
-    "imagComponent": "4",
+    "refractiveImagStart": "0",
+    "refractiveImagStop": "4",
+    "realComponent": "4",
     "refractiveInterval": "0.1",
-    "outputFileName": "mieResultsRefracImag_4.txt"
+    "outputFileName": "mieResultsRefracReal_4.txt"
 }
