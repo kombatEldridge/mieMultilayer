@@ -18,7 +18,7 @@ stopWavelength = int(settings["stopWavelength"])
 requestInterval = int(settings["intervalWavelength"])
 outputFile = str(settings["outputFileName"])
 
-lamda = np.arange(startWavelength, stopWavelength, requestInterval)
+lamda = np.arange(startWavelength, stopWavelength + requestInterval, requestInterval)
 
 n_m = 1.33  # real part of the refractive index of medium
 k_m = 0  # imaginary part of refractive index of medium
