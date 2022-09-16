@@ -1,3 +1,16 @@
+#########################################################################
+#                                                                       #
+#           The intention of this version is to copy all                #
+#           availible resources from scattnlay (publicly sourced)       #
+#           and investigate our own additions to the project.           #
+#                                                                       #
+#########################################################################
+
+################## CHANGE LOG ##################
+# All changes come from mieMultilayer_1.0.py
+# Changed all instances of "dielectric" to "refractive index"
+
+
 import scipy.constants as sc
 import scipy.special
 import scipy
@@ -10,9 +23,9 @@ settingsPath = open("mieSettings.txt")
 settings = json.load(settingsPath)
 
 numLayers = int(settings["numLayers"])
-dielectricDataPath = np.array(settings["dielectricData"])
+refractiveDataPath = np.array(settings["refractiveData"])
 radii = np.array(settings["radii"]).astype(int)
-dielectricColumns = np.array(settings["dielectricColumns"]).astype(int)
+refractiveColumns = np.array(settings["refractiveColumns"]).astype(int)
 startWavelength = int(settings["startWavelength"])
 stopWavelength = int(settings["stopWavelength"])
 requestInterval = int(settings["intervalWavelength"])
@@ -26,7 +39,7 @@ N_m = n_m+(k_m*1j)
 m_m = 1  # relative refractive index of medium
 kappa = (2*sc.pi*N_m)/lamda
 
-def interpolation(wavelengthRequested, dielectricsTemp, wavelengthsTemp):
+def interpolation(wavelengthRequested, refractivesTemp, wavelengthsTemp):
     # For loop finds the brackets of wavelengths in the actual list the wavelengthRequest sits between
     for i in range(0, len(wavelengthsTemp)):
         if (wavelengthsTemp[i] < wavelengthRequested and wavelengthsTemp[i+1] >= wavelengthRequested):
@@ -35,7 +48,7 @@ def interpolation(wavelengthRequested, dielectricsTemp, wavelengthsTemp):
     # If the wavelengthRequest sits between the first and second wavelength or just before the last wavelength, we run linear interpolation
     if (j == 0 or j == len(wavelengthsTemp)-2):
         # Eq. 3 from https://www.appstate.edu/~grayro/comphys/lecture4_11.pdf
-        return dielectricsTemp[j]+(((dielectricsTemp[j+1]-dielectricsTemp[j])/(wavelengthsTemp[j+1]-wavelengthsTemp[j]))*(wavelengthRequested-wavelengthsTemp[j]))
+        return refractivesTemp[j]+(((refractivesTemp[j+1]-refractivesTemp[j])/(wavelengthsTemp[j+1]-wavelengthsTemp[j]))*(wavelengthRequested-wavelengthsTemp[j]))
     else:
         # Lagrangian 4-point interpolation (p.5) from https://www.appstate.edu/~grayro/comphys/lecture4_11.pdf
         x = wavelengthRequested
@@ -43,18 +56,18 @@ def interpolation(wavelengthRequested, dielectricsTemp, wavelengthsTemp):
         x2 = wavelengthsTemp[j]
         x3 = wavelengthsTemp[j+1]
         x4 = wavelengthsTemp[j+2]
-        return ((((x - x2)*(x - x3)*(x - x4))/((x1 - x2)*(x1 - x3)*(x1 - x4))) * dielectricsTemp[j-1]) + ((((x - x1)*(x - x3)*(x - x4))/((x2 - x1)*(x2 - x3)*(x2 - x4))) * dielectricsTemp[j]) + ((((x - x1)*(x - x2)*(x - x4))/((x3 - x1)*(x3 - x2)*(x3 - x4))) * dielectricsTemp[j+1]) + ((((x - x1)*(x - x2)*(x - x3))/((x4 - x1)*(x4 - x2)*(x4 - x3))) * dielectricsTemp[j+2])
+        return ((((x - x2)*(x - x3)*(x - x4))/((x1 - x2)*(x1 - x3)*(x1 - x4))) * refractivesTemp[j-1]) + ((((x - x1)*(x - x3)*(x - x4))/((x2 - x1)*(x2 - x3)*(x2 - x4))) * refractivesTemp[j]) + ((((x - x1)*(x - x2)*(x - x4))/((x3 - x1)*(x3 - x2)*(x3 - x4))) * refractivesTemp[j+1]) + ((((x - x1)*(x - x2)*(x - x3))/((x4 - x1)*(x4 - x2)*(x4 - x3))) * refractivesTemp[j+2])
 
 
 def interpolationProcessor(start, stop, path):
-    dielectricDataTemp = pd.read_csv(
+    refractiveDataTemp = pd.read_csv(
         path, sep='\t', header=None, skiprows=1).values
-    wavelengthsTemp = dielectricDataTemp[:, 0].astype(float)
-    dielectricDataComplex = (
-        dielectricDataTemp[:, 1] + (dielectricDataTemp[:, 2]*1j))/N_m
+    wavelengthsTemp = refractiveDataTemp[:, 0].astype(float)
+    refractiveDataComplex = (
+        refractiveDataTemp[:, 1] + (refractiveDataTemp[:, 2]*1j))/N_m
 
     if (wavelengthsTemp[0] > start):
-        print("Error: Please make sure start wavelength is greater than or equal to the first wavelength in your dielectric file:" & path & ".")
+        print("Error: Please make sure start wavelength is greater than or equal to the first wavelength in your refractive file:" & path & ".")
     elif (wavelengthsTemp[0] == start):
         startIndex = 0
     else:
@@ -63,42 +76,42 @@ def interpolationProcessor(start, stop, path):
                 startIndex = i+1
                 break
     if (wavelengthsTemp[len(wavelengthsTemp)-1] < stop):
-        print("Error: Please make sure stop wavelength is less than or equal to the last wavelength in your dielectric files.")
+        print("Error: Please make sure stop wavelength is less than or equal to the last wavelength in your refractive files.")
 
     currWavelength = start + requestInterval
-    newDielectricArray = [dielectricDataComplex[startIndex]]
+    newrefractiveArray = [refractiveDataComplex[startIndex]]
 
     for i in np.arange(start + requestInterval, stop + requestInterval, requestInterval):
         if (currWavelength > stop):
             break
         realTemp = interpolation(
-            currWavelength, dielectricDataComplex.real, wavelengthsTemp)
+            currWavelength, refractiveDataComplex.real, wavelengthsTemp)
         imagTemp = interpolation(
-            currWavelength, dielectricDataComplex.imag, wavelengthsTemp)
-        newDielectricArray.append((realTemp + (imagTemp*1j)))
+            currWavelength, refractiveDataComplex.imag, wavelengthsTemp)
+        newrefractiveArray.append((realTemp + (imagTemp*1j)))
         currWavelength = currWavelength + requestInterval
-    newDielectricArray = np.array(newDielectricArray)
-    return newDielectricArray
+    newrefractiveArray = np.array(newrefractiveArray)
+    return newrefractiveArray
 
 
 firstDielColumn = interpolationProcessor(
-    startWavelength, stopWavelength, dielectricDataPath[0])
-dielectricArray = np.array(firstDielColumn).reshape(len(firstDielColumn), 1)
-for x in range(1, len(dielectricDataPath)):
+    startWavelength, stopWavelength, refractiveDataPath[0])
+refractiveArray = np.array(firstDielColumn).reshape(len(firstDielColumn), 1)
+for x in range(1, len(refractiveDataPath)):
     test = interpolationProcessor(
-        startWavelength, stopWavelength, dielectricDataPath[x])
-    dielectricArray = np.hstack(
-        (dielectricArray, np.array(test).reshape(len(test), 1)))
+        startWavelength, stopWavelength, refractiveDataPath[x])
+    refractiveArray = np.hstack(
+        (refractiveArray, np.array(test).reshape(len(test), 1)))
 # last column is relative refractive index of medium
-dielectricArray = np.hstack(
-    (dielectricArray, np.ones((len(dielectricArray), 1))))
+refractiveArray = np.hstack(
+    (refractiveArray, np.ones((len(refractiveArray), 1))))
 
 
 def rA(layerIndex, radiiIndex):  # Radii Adjustment
     # layerIndex = index of desired refractive index (innermost = 1)
     # radiiIndex = index of radius (innermost = 1)
     # The idea of this function is to produce m_l*r_i for any layerIndex (l) and radiiIndex (i)
-    return (dielectricArray[:, layerIndex-1]*2*sc.pi*radii[radiiIndex-1]*N_m)/lamda
+    return (refractiveArray[:, layerIndex-1]*2*sc.pi*radii[radiiIndex-1]*N_m)/lamda
 
 
 # The next two variables are chosen from Eq 30 from Yang 2003
@@ -114,7 +127,7 @@ for j in range(1, numLayers+1):
     if (max(abs(rA(j+1, j))) > largest):
         largest = max(abs(rA(j, j)))
 
-# radial adjustment without dielectric component
+# radial adjustment without refractive component
 xL = max(kappa*radii[len(radii)-1])
 if ((xL <= 8)):
     Nstop = np.round(xL + 4*(xL)**(1/3) + 1)
@@ -175,9 +188,9 @@ def Hal(n, l):
 
 def Al(n, l):
     if (l == 2):
-        return (RR(n, rA(2, 1)))*(((dielectricArray[:, 1]*D1(n, rA(1, 1)))-(dielectricArray[:, 0]*D1(n, rA(2, 1))))/((dielectricArray[:, 1]*D1(n, rA(1, 1)))-(dielectricArray[:, 0]*D3(n, rA(2, 1)))))
+        return (RR(n, rA(2, 1)))*(((refractiveArray[:, 1]*D1(n, rA(1, 1)))-(refractiveArray[:, 0]*D1(n, rA(2, 1))))/((refractiveArray[:, 1]*D1(n, rA(1, 1)))-(refractiveArray[:, 0]*D3(n, rA(2, 1)))))
     else:
-        return (RR(n, rA(l, l-1)))*(((dielectricArray[:, l-1]*Hal(n, l-1))-(dielectricArray[:, l-2]*D1(n, rA(l, l-1))))/((dielectricArray[:, l-1]*Hal(n, l-1))-(dielectricArray[:, l-2]*D3(n, rA(l, l-1)))))
+        return (RR(n, rA(l, l-1)))*(((refractiveArray[:, l-1]*Hal(n, l-1))-(refractiveArray[:, l-2]*D1(n, rA(l, l-1))))/((refractiveArray[:, l-1]*Hal(n, l-1))-(refractiveArray[:, l-2]*D3(n, rA(l, l-1)))))
 
 
 def Hbl(n, l):
@@ -186,9 +199,9 @@ def Hbl(n, l):
 
 def Bl(n, l):
     if (l == 2):
-        return (RR(n, rA(2, 1)))*(((dielectricArray[:, 0]*D1(n, rA(1, 1)))-(dielectricArray[:, 1]*D1(n, rA(2, 1))))/((dielectricArray[:, 0]*D1(n, rA(1, 1)))-(dielectricArray[:, 1]*D3(n, rA(2, 1)))))
+        return (RR(n, rA(2, 1)))*(((refractiveArray[:, 0]*D1(n, rA(1, 1)))-(refractiveArray[:, 1]*D1(n, rA(2, 1))))/((refractiveArray[:, 0]*D1(n, rA(1, 1)))-(refractiveArray[:, 1]*D3(n, rA(2, 1)))))
     else:
-        return (RR(n, rA(l, l-1)))*(((dielectricArray[:, l-2]*Hbl(n, l-1))-(dielectricArray[:, l-1]*D1(n, rA(l, l-1))))/((dielectricArray[:, l-2]*Hbl(n, l-1))-(dielectricArray[:, l-1]*D3(n, rA(l, l-1)))))
+        return (RR(n, rA(l, l-1)))*(((refractiveArray[:, l-2]*Hbl(n, l-1))-(refractiveArray[:, l-1]*D1(n, rA(l, l-1))))/((refractiveArray[:, l-2]*Hbl(n, l-1))-(refractiveArray[:, l-1]*D3(n, rA(l, l-1)))))
 
 def cext(L):
     sumd = 0
@@ -212,7 +225,7 @@ def Qext(L):
     i = L-1
     # incase any of the outer layers are the same as the medium
     while i > (-1):
-        if (dielectricArray[:, i] != m_m).all():
+        if (refractiveArray[:, i] != m_m).all():
             solid = i  # set the solid outer layer index (core = 1)
             break
         i -= 1
@@ -226,7 +239,7 @@ def Qsca(L):
     i = L-1
     # incase any of the outer layers are the same as the medium
     while i > (-1):
-        if (dielectricArray[:, i] != m_m).all():
+        if (refractiveArray[:, i] != m_m).all():
             solid = i  # set the solid outer layer index (core = 1)
             break
         i -= 1

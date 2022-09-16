@@ -11,21 +11,25 @@ settings = json.load(settingsPath)
 
 numLayers = int(settings["numLayers"])
 lamda = int(settings["wavelength"])
-# dielectricDataPath = np.array(settings["dielectricData"])
 radii = np.array(settings["radii"]).astype(int)
-refractiveStart = int(settings["refractiveImagStart"])
-refractiveStop = int(settings["refractiveImagStop"])
+refractiveStart = int(settings["refractiveStart"])
+refractiveStop = int(settings["refractiveStop"])
 refractiveInterval = float(settings["refractiveInterval"])
 refracArray = np.arange(refractiveStart, refractiveStop, refractiveInterval)
 refracArray = refracArray.reshape(len(refracArray), 1)
 for x in range(1, numLayers):
     refracArray = np.hstack((refracArray, refracArray))
-realComponent = int(settings["realComponent"])
-refracArray = realComponent + refracArray*1j
-refracArray = np.hstack((refracArray, np.ones((len(refracArray), 1))))
 outputFile = str(settings["outputFileName"])
 
-print(refracArray)
+if(str(settings["varyRealImag"]) == "real"):
+    imagComponent = int(settings["constantComponent"])
+    refracArray = refracArray + imagComponent*1j
+    refracArray = np.hstack((refracArray, np.ones((len(refracArray), 1))))
+
+if(str(settings["varyRealImag"]) == "imag"):
+    realComponent = int(settings["constantComponent"])
+    refracArray = realComponent + refracArray*1j
+    refracArray = np.hstack((refracArray, np.ones((len(refracArray), 1))))
 
 n_m = 1.33  # real part of the refractive index of medium
 k_m = 0  # imaginary part of refractive index of medium
@@ -173,7 +177,7 @@ header = "\t".join(["#Refrac", "Qext", "Qsca", "Qabs", "Qnf"])
 
 file.write(header)
 file.write("\n")
-
+print(header)
 list1 = np.around(refracArray[:,0], 2)
 list2 = Qext(numLayers).real
 list3 = Qsca(numLayers).real
@@ -186,6 +190,7 @@ for i in range(0, len(refracArray)):
                      str(list4[i]),
                      str(Qnfl[i])])
     file.write(text+"\n")
+    print(text)
 file.close()
 
-print("Processing is finished. File " + outputFile + " created")
+print("\nProcessing is finished. File " + outputFile + " created")

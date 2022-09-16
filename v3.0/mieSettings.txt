@@ -1,14 +1,14 @@
 {
     "numLayers": "3",
-    "dielectricData": [
+    "refractiveData": [
         "refractiveFiles/Au_diel.txt",
         "refractiveFiles/Si_diel.txt",
-        "refractiveFiles/Au_diel.txt"
+        "refractiveFiles/Ag_diel.txt"
     ],
     "radii": ["10","20","30"],
-    "dielectricColumns": ["1","2","1","2","1","2"],
+    "refractiveColumns": ["1","2","1","2","1","2"],
     "startWavelength": "300",
-    "stopWavelength": "1000",
+    "stopWavelength": "800",
     "intervalWavelength": "1",
-    "outputFileName": "mieResultsAuSiAu.txt"
+    "outputFileName": "mieResults.txt"
 }
